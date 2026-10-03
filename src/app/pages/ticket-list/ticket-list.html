@@ -1,0 +1,340 @@
+<div class="page">
+
+  <div class="container">
+
+    <!-- Header -->
+
+    <header class="page-header">
+
+      <div>
+        <div class="title-row">
+          <div class="title-icon">🎧</div>
+
+          <div>
+            <h1>درخواست‌های پشتیبانی</h1>
+            <p>مدیریت و پیگیری درخواست‌های ثبت‌شده</p>
+          </div>
+        </div>
+      </div>
+
+      <a
+        routerLink="/tickets/new"
+        class="new-ticket">
+
+        <span>+</span>
+        ثبت درخواست جدید
+
+      </a>
+
+    </header>
+
+
+    <!-- Filters -->
+
+    <section class="filters-card">
+
+      <div class="search">
+
+        <span class="search-icon">⌕</span>
+
+        <input
+          type="text"
+          [(ngModel)]="search"
+          (keyup.enter)="searchTickets()"
+          placeholder="جستجو بر اساس عنوان یا نام درخواست‌کننده..."
+        />
+
+      </div>
+
+
+      <select
+        [(ngModel)]="selectedStatus"
+        (change)="filterChanged()">
+
+        <option value="">
+          همه وضعیت‌ها
+        </option>
+
+        <option [ngValue]="statuses[0]">
+          باز
+        </option>
+
+        <option [ngValue]="statuses[1]">
+          در حال بررسی
+        </option>
+
+        <option [ngValue]="statuses[2]">
+          انجام شده
+        </option>
+
+      </select>
+
+
+      <select
+        [(ngModel)]="selectedPriority"
+        (change)="filterChanged()">
+
+        <option value="">
+          همه اولویت‌ها
+        </option>
+
+        <option [ngValue]="priorities[0]">
+          کم
+        </option>
+
+        <option [ngValue]="priorities[1]">
+          متوسط
+        </option>
+
+        <option [ngValue]="priorities[2]">
+          زیاد
+        </option>
+
+      </select>
+
+
+      <button
+        class="search-button"
+        (click)="searchTickets()">
+
+        جستجو
+
+      </button>
+
+    </section>
+
+
+    <!-- Table Card -->
+
+    <section class="table-card">
+
+      <div class="table-header">
+
+        <div>
+          <h2>لیست درخواست‌ها</h2>
+          <span>
+            {{ tickets.length }} درخواست
+          </span>
+        </div>
+
+      </div>
+
+
+      <!-- Loading -->
+
+
+      <!-- Table -->
+
+      <div
+        class="table-responsive">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                عنوان درخواست
+              </th>
+
+              <th>
+                درخواست‌کننده
+              </th>
+
+              <th>
+                اولویت
+              </th>
+
+              <th>
+                وضعیت
+              </th>
+
+              <th>
+                تاریخ ایجاد
+              </th>
+
+              <th>
+                زمان باز
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="let ticket of tickets"
+              [class.overdue-row]="ticket.isOverdue">
+
+
+              <!-- Title -->
+
+              <td>
+
+                <div class="ticket-title">
+
+                  <span>
+                    {{ ticket.title }}
+                  </span>
+
+                  <span
+                    *ngIf="ticket.isOverdue"
+                    class="overdue-badge">
+
+                    سررسید گذشته
+
+                  </span>
+
+                </div>
+
+                <div class="description">
+                  {{ ticket.description }}
+                </div>
+
+              </td>
+
+
+              <!-- Requester -->
+
+              <td>
+
+                <div class="requester">
+
+                  <div class="avatar">
+                    {{ ticket.requesterName.charAt(0) }}
+                  </div>
+
+                  <span>
+                    {{ ticket.requesterName }}
+                  </span>
+
+                </div>
+
+              </td>
+
+
+              <!-- Priority -->
+
+              <td>
+
+                <span
+                  class="priority"
+                  [class.priority-high]="ticket.priority === 'High'"
+                  [class.priority-medium]="ticket.priority === 'Medium'"
+                  [class.priority-low]="ticket.priority === 'Low'">
+
+                  <ng-container
+                    [ngSwitch]="ticket.priority">
+
+                    <span *ngSwitchCase="'High'">
+                      زیاد
+                    </span>
+
+                    <span *ngSwitchCase="'Medium'">
+                      متوسط
+                    </span>
+
+                    <span *ngSwitchCase="'Low'">
+                      کم
+                    </span>
+
+                  </ng-container>
+
+                </span>
+
+              </td>
+
+
+              <!-- Status -->
+
+              <td>
+
+                <select
+                  class="status-select"
+                  [ngModel]="ticket.status"
+                  (ngModelChange)="changeStatus(ticket, $event)">
+
+                  <option
+                    [ngValue]="statuses[0]">
+                    باز
+                  </option>
+
+                  <option
+                    [ngValue]="statuses[1]">
+                    در حال بررسی
+                  </option>
+
+                  <option
+                    [ngValue]="statuses[2]">
+                    انجام شده
+                  </option>
+
+                </select>
+
+              </td>
+
+
+              <!-- Created -->
+
+              <td class="date">
+                {{ ticket.createdAt | persianDate }}
+              </td>
+
+
+              <!-- Hours -->
+
+              <td>
+
+                <div class="hours">
+
+                  {{ ticket.totalOpenHours | number:'1.0-1' }}
+
+                  <span>
+                    ساعت
+                  </span>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+
+            <!-- Empty -->
+
+            <tr *ngIf="tickets.length === 0">
+
+              <td
+                colspan="6"
+                class="empty">
+
+                <div class="empty-icon">
+                  ☰
+                </div>
+
+                <h3>
+                  درخواستی پیدا نشد
+                </h3>
+
+                <p>
+                  با فیلترهای فعلی درخواستی وجود ندارد.
+                </p>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
